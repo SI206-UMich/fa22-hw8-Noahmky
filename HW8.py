@@ -9,7 +9,20 @@ def get_restaurant_data(db_filename):
     dictionaries. The key:value pairs should be the name, category, building, and rating
     of each restaurant in the database.
     """
-    pass
+    db = sqlite3.connect(db_filename):
+    db.row_factory = sqlite3.Row
+    building_id = db.execute("UPDATE restaurants SET building_id = (SELECT building FROM buildings WHERE buidlings.id = restaurants.building_id)").fetchall()
+    category_id = db.execute("UPDATE restaurants SET category_id = (SELECT category FROM categories WHERE categories.id = restaurants.category_id)").fetchall()
+    building = db.execute("ALTER TABLE restaurants RENAME COLUMN building_id TO building")
+    category = db.execute("ALTER TABLE restaurants RENAME COLUMN category_id TO category")
+    results = db.execute(f"SELECT * FROM restaurants").fetchall()
+
+    end = []
+    for item in results:
+        i = {k: item[k] for k in item.keys() if k != "id"}
+        end.append(i)
+    return end
+
 
 def barchart_restaurant_categories(db_filename):
     """
