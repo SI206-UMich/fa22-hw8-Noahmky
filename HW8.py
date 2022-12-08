@@ -1,7 +1,9 @@
-#import matplotlib.pyplot as plt
+import matplotlib.pyplot as plt
 import os
 import sqlite3
 import unittest
+from collections import OrderedDict
+
 
 def get_restaurant_data(db_filename):
     """
@@ -31,7 +33,36 @@ def barchart_restaurant_categories(db_filename):
     also create a bar chart with restaurant categories and the counts of each category.
     """
     db = sqlite3.connect(db_filename)
+    db.row_factory = sqlite3.Row
+    category_id = db.execute("UPDATE resturants SET category_id = (SELECT category FROM categories WHERE categories.id = restaurants.category_id)").fetchall()
+    results = db.execute(f"SELECT category_id, name FROM restaurants").fetchall()
+
+    new = {}
+    lst = []
+    for item in results:
+        for i in item:
+            i = {k: item[k] for k in item.keys() if k != "id"}
+            lst.append(i)
+    for item in lst:
+        if item("category_id") not in new:
+            new[item["category_id"]] = 1
+        else:
+            new[item["category_id"]] += 1
+    for k,v in new.items():
+        new[k] = int(new[k]/2)
     
+    sorted_dict = sorted(new.items(), key = lambda x:x[1], reverse = True)
+    sorted_dict = dict(sorted_dict)
+
+    names = list(sorted_dict.keys())
+    values = list(sorted_dict.values())
+    plt.bar(range(len(sorted_dict)), values, tick_label = names)
+    plt.xticks(rotation = 90)
+    plt.show()
+
+    sorted_new = OrderedDict(sorted(new.items()))
+    return dict(sorted_new)
+
 
 #EXTRA CREDIT
 def highest_rated_category(db_filename):#Do this through DB as well
@@ -45,7 +76,8 @@ def highest_rated_category(db_filename):#Do this through DB as well
 
 #Try calling your functions here
 def main():
-    pass
+    get_restaurant_data("south_U_Restaurants.db")
+    barchart_restaurant_categories("South_U_Restaurants.db")
 
 class TestHW8(unittest.TestCase):
     def setUp(self):
@@ -79,11 +111,11 @@ class TestHW8(unittest.TestCase):
         self.assertEqual(rest_data[0], self.rest_dict)
         self.assertEqual(len(rest_data), 25)
 
-    #def test_barchart_restaurant_categories(self):
-        #cat_data = barchart_restaurant_categories('South_U_Restaurants.db')
-        #self.assertIsInstance(cat_data, dict)
-        #self.assertEqual(cat_data, self.cat_dict)
-        #self.assertEqual(len(cat_data), 14)
+    def test_barchart_restaurant_categories(self):
+        cat_data = barchart_restaurant_categories('South_U_Restaurants.db')
+        self.assertIsInstance(cat_data, dict)
+        self.assertEqual(cat_data, self.cat_dict)
+        self.assertEqual(len(cat_data), 14)
 
     #def test_highest_rated_category(self):
         #best_category = highest_rated_category('South_U_Restaurants.db')
