@@ -1,4 +1,4 @@
-import matplotlib.pyplot as plt
+#import matplotlib.pyplot as plt
 import os
 import sqlite3
 import unittest
@@ -9,19 +9,19 @@ def get_restaurant_data(db_filename):
     dictionaries. The key:value pairs should be the name, category, building, and rating
     of each restaurant in the database.
     """
-    db = sqlite3.connect(db_filename):
+    db = sqlite3.connect(db_filename)
     db.row_factory = sqlite3.Row
-    building_id = db.execute("UPDATE restaurants SET building_id = (SELECT building FROM buildings WHERE buidlings.id = restaurants.building_id)").fetchall()
+    building_id = db.execute("UPDATE restaurants SET building_id = (SELECT building FROM buildings WHERE buildings.id = restaurants.building_id)").fetchall()
     category_id = db.execute("UPDATE restaurants SET category_id = (SELECT category FROM categories WHERE categories.id = restaurants.category_id)").fetchall()
     building = db.execute("ALTER TABLE restaurants RENAME COLUMN building_id TO building")
     category = db.execute("ALTER TABLE restaurants RENAME COLUMN category_id TO category")
     results = db.execute(f"SELECT * FROM restaurants").fetchall()
 
-    end = []
+    output = []
     for item in results:
         i = {k: item[k] for k in item.keys() if k != "id"}
-        end.append(i)
-    return end
+        output.append(i)
+    return output
 
 
 def barchart_restaurant_categories(db_filename):
@@ -30,7 +30,8 @@ def barchart_restaurant_categories(db_filename):
     restaurant categories and the values should be the number of restaurants in each category. The function should
     also create a bar chart with restaurant categories and the counts of each category.
     """
-    pass
+    db = sqlite3.connect(db_filename)
+    
 
 #EXTRA CREDIT
 def highest_rated_category(db_filename):#Do this through DB as well
@@ -78,16 +79,16 @@ class TestHW8(unittest.TestCase):
         self.assertEqual(rest_data[0], self.rest_dict)
         self.assertEqual(len(rest_data), 25)
 
-    def test_barchart_restaurant_categories(self):
-        cat_data = barchart_restaurant_categories('South_U_Restaurants.db')
-        self.assertIsInstance(cat_data, dict)
-        self.assertEqual(cat_data, self.cat_dict)
-        self.assertEqual(len(cat_data), 14)
+    #def test_barchart_restaurant_categories(self):
+        #cat_data = barchart_restaurant_categories('South_U_Restaurants.db')
+        #self.assertIsInstance(cat_data, dict)
+        #self.assertEqual(cat_data, self.cat_dict)
+        #self.assertEqual(len(cat_data), 14)
 
-    def test_highest_rated_category(self):
-        best_category = highest_rated_category('South_U_Restaurants.db')
-        self.assertIsInstance(best_category, tuple)
-        self.assertEqual(best_category, self.best_category)
+    #def test_highest_rated_category(self):
+        #best_category = highest_rated_category('South_U_Restaurants.db')
+        #self.assertIsInstance(best_category, tuple)
+        #self.assertEqual(best_category, self.best_category)
 
 if __name__ == '__main__':
     main()
