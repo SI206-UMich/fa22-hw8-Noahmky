@@ -4,6 +4,7 @@ import sqlite3
 import unittest
 from collections import OrderedDict
 
+#Worked with Aakash Narayan 
 
 def get_restaurant_data(db_filename):
     """
@@ -34,24 +35,24 @@ def barchart_restaurant_categories(db_filename):
     """
     db = sqlite3.connect(db_filename)
     db.row_factory = sqlite3.Row
-    category_id = db.execute("UPDATE resturants SET category_id = (SELECT category FROM categories WHERE categories.id = restaurants.category_id)").fetchall()
+    category_id = db.execute("UPDATE restaurants SET category_id = (SELECT category FROM categories WHERE categories.id = restaurants.category_id)").fetchall()
     results = db.execute(f"SELECT category_id, name FROM restaurants").fetchall()
 
-    new = {}
+    out = {}
     lst = []
     for item in results:
         for i in item:
             i = {k: item[k] for k in item.keys() if k != "id"}
             lst.append(i)
     for item in lst:
-        if item("category_id") not in new:
-            new[item["category_id"]] = 1
+        if item["category_id"] not in out:
+            out[item["category_id"]] = 1
         else:
-            new[item["category_id"]] += 1
-    for k,v in new.items():
-        new[k] = int(new[k]/2)
+            out[item["category_id"]] += 1
+    for k,v in out.items():
+        out[k] = int(out[k]/2)
     
-    sorted_dict = sorted(new.items(), key = lambda x:x[1], reverse = True)
+    sorted_dict = sorted(out.items(), key = lambda x:x[1], reverse = True)
     sorted_dict = dict(sorted_dict)
 
     names = list(sorted_dict.keys())
@@ -60,8 +61,8 @@ def barchart_restaurant_categories(db_filename):
     plt.xticks(rotation = 90)
     plt.show()
 
-    sorted_new = OrderedDict(sorted(new.items()))
-    return dict(sorted_new)
+    sorted_out = OrderedDict(sorted(out.items()))
+    return dict(sorted_out)
 
 
 #EXTRA CREDIT
@@ -76,7 +77,7 @@ def highest_rated_category(db_filename):#Do this through DB as well
 
 #Try calling your functions here
 def main():
-    get_restaurant_data("south_U_Restaurants.db")
+    get_restaurant_data("South_U_Restaurants.db")
     barchart_restaurant_categories("South_U_Restaurants.db")
 
 class TestHW8(unittest.TestCase):
